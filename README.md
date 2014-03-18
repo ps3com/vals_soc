@@ -5,6 +5,9 @@ VALS Drupal module
 
 Install the following Drupal Module Dependencies...
 
-https://drupal.org/project/date
-https://drupal.org/project/smtp
-https://drupal.org/project/ckeditor
+[Date Module](https://drupal.org/project/date)
+[SMTP Module](https://drupal.org/project/smtp)
+[CKEditor Module](https://drupal.org/project/ckeditor)
+
+
+
