@@ -1,0 +1,11 @@
+name = VALS summer of code
+description = A framework which allows students to apply to complete software projects based on ideas given by organizations and mentors. Based on Googles Summer of Code (Melange)
+core = 7.x
+package = VALS Summer of code suite
+php = 5.2
+version = 7.x.1.0
+dependencies[] = date_popup
+dependencies[] = smtp
+dependencies[] = ckeditor
+configure = admin/config/vals_soc
+files[] = includes/vals_soc.helper.inc
