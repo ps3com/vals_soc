@@ -97,9 +97,146 @@ function vals_soc_mail($key, &$message, $params) {
 	}
 }
 
+//From here other try out code. See if integration works
+define('_SITE_ADMIN_ROLE', 7);
+define('_TUTOR_ROLE', 6);
+define('_MENTOR_ROLE', 5);
+define('_STUDENT_ROLE', 4);
+define('_ADMIN_ROLE', 3);
+define('_USER_ROLE', 2);
+define('_ANONYMOUS_ROLE', 1);
 /**
  * Implements hook_help().
+ *
+ * Displays help and module information.
+ *
+ * @param path
+ *   Which path of the site we're using to display help
+ * @param arg
+ *   Array that holds the current path as returned from arg() function
  */
 function vals_soc_help($path, $arg) {
-	//TODO
+  switch ($path) {
+    case "admin/help#soc":
+      return '<p>' . t("Laat ons semester of code blok zien") . '</p>';
+      break;
+  }
+} 
+
+/**
+ * Implements hook_block_info().
+ */
+function vals_soc_block_info() {
+  $blocks['soc'] = array(
+    // The name that will appear in the block list.
+    'info' => t('Semester of Code'),
+    // Default setting.
+    'cache' => DRUPAL_CACHE_PER_ROLE,
+  );
+  return $blocks;
+}
+
+/**
+ * Custom content function.
+ *
+ * Set beginning and end dates, retrieve posts from database
+ * saved in that time period.
+ *
+ * @return
+ *   A result set of the targeted posts.
+ */
+function vals_soc_contents(){
+  //Get today's date.
+//  $today = getdate();
+//  //Calculate the date a week ago.
+//  $start_time = mktime(0, 0, 0,$today['mon'],($today['mday'] - 7), $today['year']);
+//  //Get all posts from one week ago to the present.
+//  $end_time = time();
+//  //Use Database API to retrieve current posts.
+//  $query = db_select('node', 'n')
+//    ->fields('n', array('nid', 'title', 'created'))
+//    ->condition('status', 1) //Published.
+//    ->condition('created', array($start_time, $end_time), 'BETWEEN')
+//    ->orderBy('created', 'DESC') //Most recent first.
+//    ->execute();
+  return array();
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function vals_soc_user_register_form_alter(&$form, &$form_state) {
+//  if (variable_get('configurable_timezones', 1)) {
+//    if (variable_get('user_default_timezone', DRUPAL_USER_TIMEZONE_DEFAULT) == DRUPAL_USER_TIMEZONE_SELECT) {
+//      system_user_timezone($form, $form_state);
+//    }
+//    else {
+      $form['account']['account_type2'] = array(
+        "#type" => "select",
+        "#title" => t("What is your role"),
+        //"#default_value" => 0,//variable_get('user_default_role', _ANONYMOUS_ROLE),
+        "#options" => array(
+            _STUDENT_ROLE => t("Student"),
+            _TUTOR_ROLE => t("Supervisor"),
+            _MENTOR_ROLE => t("Mentor"),
+        ),
+        "#description" => t("Select your role in Semester of Code."),
+    );
+
+//    $form['account']['account_key'] = array(
+//        "#type" => "textfield",
+//        "#title" => t("Type the key you got from the admin"),
+//        "#value" => '',
+//        "#description" => t("Select your role in Semester of Code."),
+//    );
+   // }
+    return $form;
+ // }
+}
+
+  function vals_soc_projects(){
+      return array();
+      $result = db_select('projects', $alias);
+  }
+  
+function vals_soc_block_view($delta = '') {
+  switch ($delta) {
+    case 'soc':
+      $block['subject'] = t('Het inner blok');
+      if (user_access('access content')) {
+        // Use our custom function to retrieve data.
+          
+        //Rol uitvinden van de user die is ingelogd
+          
+        $result = vals_soc_projects();
+        // Array to contain items for the block to render.
+        $items = array();
+        // Iterate over the resultset and format as links.
+        if ($result){
+            include('includes/classes/Projects.php');
+            
+            $project_obj = new Project();
+            foreach ($result as $project) {
+              $items[] = array(
+                'data' => $project_obj->show_project($project),
+              );
+            }
+        }
+        $block['content'] = '<h2>Current available projects</h2>';
+       // No content in the last week.
+        if (empty($items)) {
+          $block['content'] .= t('No projects available yet.');
+        }
+        else {
+          // Pass data through theme function.
+          $block['content'] = theme('item_list', array('items' => $items));
+        }
+        //$soc_content = 'index should go here';
+        ob_start();
+        include(__DIR__.'/includes/index.php');
+        $soc_content = ob_get_clean();
+        $block['content'] = t('Dit moet anders'). $soc_content;
+      }
+    return $block;
+  } 
 }
