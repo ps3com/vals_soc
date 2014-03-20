@@ -165,13 +165,13 @@ function vals_soc_contents(){
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-function vals_soc_user_register_form_alter(&$form, &$form_state) {
+function vals_soc_form_user_register_form_alter(&$form, &$form_state) {
 //  if (variable_get('configurable_timezones', 1)) {
 //    if (variable_get('user_default_timezone', DRUPAL_USER_TIMEZONE_DEFAULT) == DRUPAL_USER_TIMEZONE_SELECT) {
 //      system_user_timezone($form, $form_state);
 //    }
 //    else {
-      $form['account']['account_type2'] = array(
+      $form['account']['account_type'] = array(
         "#type" => "select",
         "#title" => t("What is your role"),
         //"#default_value" => 0,//variable_get('user_default_role', _ANONYMOUS_ROLE),
@@ -183,20 +183,20 @@ function vals_soc_user_register_form_alter(&$form, &$form_state) {
         "#description" => t("Select your role in Semester of Code."),
     );
 
-//    $form['account']['account_key'] = array(
-//        "#type" => "textfield",
-//        "#title" => t("Type the key you got from the admin"),
-//        "#value" => '',
-//        "#description" => t("Select your role in Semester of Code."),
-//    );
-   // }
+    $form['account']['account_key'] = array(
+        "#type" => "textfield",
+        "#title" => t("Type the key you got from the admin"),
+        "#size" => 10,
+        "#description" => t("This code is different per role."),
+    );
+    
     return $form;
  // }
 }
 
   function vals_soc_projects(){
       return array();
-      $result = db_select('projects', $alias);
+      $result = db_select('soc_projects');
   }
   
 function vals_soc_block_view($delta = '') {
@@ -213,8 +213,7 @@ function vals_soc_block_view($delta = '') {
         $items = array();
         // Iterate over the resultset and format as links.
         if ($result){
-            include('includes/classes/Projects.php');
-            
+            include('includes/classes/Projects.php');           
             $project_obj = new Project();
             foreach ($result as $project) {
               $items[] = array(
@@ -231,11 +230,10 @@ function vals_soc_block_view($delta = '') {
           // Pass data through theme function.
           $block['content'] = theme('item_list', array('items' => $items));
         }
-        //$soc_content = 'index should go here';
         ob_start();
         include(__DIR__.'/includes/index.php');
         $soc_content = ob_get_clean();
-        $block['content'] = t('Dit moet anders'). $soc_content;
+        $block['content'] = t('Here comes the content'). $soc_content;
       }
     return $block;
   } 
