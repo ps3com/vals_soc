@@ -1,5 +1,6 @@
 <?php 
-require_once('vals_soc.helper.inc');
+//require_once('vals_soc.helper.inc');
+module_load_include('inc', 'vals_soc', 'includes/install/vals_soc.roles');
 
 /**
  * Form to edit the programme email messages
@@ -84,6 +85,13 @@ function vals_soc_admin_messages_form($form, $form_state){
 }
 
 
+/**
+ * A validation routine for the admin messages form which checks that if
+ * an email address was entered, it is parsed and checked to try to ascertain
+ * if it is valid or not.
+ * @param unknown $form
+ * @param unknown $form_state
+ */
 function vals_soc_admin_messages_form_validate($form, $form_state) {
 	if (!empty($form_state['values']['vals_messages_test_email'])){
 		$mail = $form_state['values']['vals_messages_test_email'];
@@ -93,10 +101,16 @@ function vals_soc_admin_messages_form_validate($form, $form_state) {
 	}
 }
 
+/**
+ * Function to call the test email function on form submission
+ * @param unknown $form
+ * @param unknown $form_state
+ */
 function vals_soc_admin_messages_form_submit($form, $form_state) {
 	// fire off our test email handler
 	if (!empty($form_state['values']['vals_messages_test_email'])){
 		drupal_set_message(t('Sending test emails to ').  $form_state['values']['vals_messages_test_email'] ."");
+		module_load_include('inc', 'vals_soc', 'includes/module/vals_soc.mail');
 		vals_soc_handle_test_emails($form_state['values']['vals_messages_test_email']);
 	}
 }
@@ -178,4 +192,39 @@ function vals_soc_admin_timeline_form($form, &$form_state){
 	);
 	
 	return system_settings_form($form);
+}
+
+/**
+ * Override the login form so we can add custom elements to it
+ * @param unknown $form
+ * @param unknown $form_state
+ * @return multitype:string number NULL
+ */
+function vals_soc_form_user_register_form_alter_handler(&$form, &$form_state) {
+	//  if (variable_get('configurable_timezones', 1)) {
+	//    if (variable_get('user_default_timezone', DRUPAL_USER_TIMEZONE_DEFAULT) == DRUPAL_USER_TIMEZONE_SELECT) {
+	//      system_user_timezone($form, $form_state);
+	//    }
+	//    else {
+	$form['account']['account_type'] = array(
+			"#type" => "select",
+			"#title" => t("What is your role"),
+			//"#default_value" => 0,//variable_get('user_default_role', _ANONYMOUS_ROLE),
+			"#options" => array(
+					_STUDENT_ROLE => t("Student"),
+					_TUTOR_ROLE => t("Supervisor"),
+					_MENTOR_ROLE => t("Mentor"),
+			),
+			"#description" => t("Select your role in Semester of Code."),
+	);
+
+	$form['account']['account_key'] = array(
+			"#type" => "textfield",
+			"#title" => t("Type the key you got from the admin"),
+			"#size" => 10,
+			"#description" => t("This code is different per role."),
+	);
+
+	return $form;
+	// }
 }

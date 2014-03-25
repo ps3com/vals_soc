@@ -1,112 +1,54 @@
 <?php
+/*
+ * To modularise the drupal hooks we load in our code as needed using module_load_include
+ * We should only use this file for drupal hooks  
+ * (Otherwise this file will get rather large)
+ * NOTE: module_load_include results in a "require_once" anyway
+ */
 
-function vals_soc_menu(){
-	
-    $items['admin/config/vals_soc'] = array(
-		'title' => 'VALS Summer of code',
-		'type' => MENU_NORMAL_ITEM,
-    	'page callback' => 'vals_soc_timeline_admin_overview_page',
-		'access arguments' => array('access administration pages'),
-    	'description' => 'Allow Administration on the summer of code module',
-    	'file' => 'vals_soc.pages.inc',
-    	'file path' => drupal_get_path('module', 'vals_soc') . '/includes/',
-    );
-
-    $items['admin/config/vals_soc/program_settings'] = array(
-    	'title' => 'Program Settings',
-    	'type' => MENU_NORMAL_ITEM,
-    	'page callback' => 'vals_soc_timeline_admin_program_page',
-    	'access arguments' => array('access administration pages'),
-    	'description' => 'Allow Administration on the summer of code module',
-    	'file' => 'vals_soc.pages.inc',
-    	'file path' => drupal_get_path('module', 'vals_soc') . '/includes/',
-    );
-    
-    $items['admin/config/vals_soc/program_settings/timeline'] = array(
-    	'title' => 'Edit Timeline',
-    	'type' => MENU_NORMAL_ITEM,
-    	'page callback' => 'drupal_get_form',
-    	'page arguments' => array('vals_soc_admin_timeline_form'),
-    	'access arguments' => array('access administration pages'),
-    	'description' => 'Edit the timeline and other settings.',
-    	'file' => 'vals_soc.forms.inc',
-    	'file path' => drupal_get_path('module', 'vals_soc') . '/includes/',
-    );
-    
-	$items['admin/config/vals_soc/program_settings/messages'] = array(
-		'title' => 'Edit Messages',
-    	'type' => MENU_NORMAL_ITEM,
-    	'page callback' => 'drupal_get_form',
-    	'page arguments' => array('vals_soc_admin_messages_form'),
-    	'access arguments' => array('access administration pages'),
-    	'description' => 'Edit the email messages that are sent to users.',
-    	'file' => 'vals_soc.forms.inc',
-    	'file path' => drupal_get_path('module', 'vals_soc') . '/includes/',
-    );
-
-    return $items;
-}
-
-function vals_soc_mail_alter(&$message) {
-	$headers = array(
-			'MIME-Version' => '1.0',
-			'Content-Type' => 'text/html; charset=iso-8859-1; format=flowed',
-			'Content-Transfer-Encoding' => '8Bit',
-			'X-Mailer' => 'Drupal',
-	);
-	foreach ($headers as $key => $value) {
-		$message['headers'][$key] = $value;
-	}
-}
-
-function vals_soc_mail($key, &$message, $params) {
-
-	switch($key) {
-		case 'vals_soc_email_accepted_organization':
-			$message['subject'] = t('Organization application for VALS summer of code');
-			$message['body'][] = variable_get('vals_accepted_organizations_message')['value'];
-			if (isset($params['headers']) && is_array($params['headers'])) {
-				$message['headers'] += $params['headers'];
-			}
-			break;
-
-		case 'vals_soc_email_rejected_organization':
-			$message['subject'] = t('Organization application for VALS summer of code');
-			$message['body'][] = variable_get('vals_rejected_organizations_message')['value'];
-			break;
-
-		case 'vals_soc_email_mentor_welcome':
-			$message['subject'] = t('Welcome mentor to the VALS summer of code');
-			$message['body'][] = variable_get('vals_mentor_welcome_message')['value'];
-			break;
-				
-		case 'vals_soc_email_student_welcome':
-			$message['subject'] = t('Welcome student to the VALS summer of code');
-			$message['body'][] = variable_get('vals_student_welcome_message')['value'];
-			break;
-				
-		case 'vals_soc_accepted_students':
-			$message['subject'] = t('Your project proposal to the VALS summer of code');
-			$message['body'][] = variable_get('vals_accepted_students_message')['value'];
-			break;
-
-		case 'vals_soc_rejected_students':
-			$message['subject'] = t('Your project proposal to the VALS summer of code');
-			$message['body'][] = variable_get('vals_rejected_students_message')['value'];
-			break;
-	}
-}
-
-//From here other try out code. See if integration works
-define('_SITE_ADMIN_ROLE', 7);
-define('_TUTOR_ROLE', 6);
-define('_MENTOR_ROLE', 5);
-define('_STUDENT_ROLE', 4);
-define('_ADMIN_ROLE', 3);
-define('_USER_ROLE', 2);
-define('_ANONYMOUS_ROLE', 1);
+//***********************************************************************************
+// BLOCKS
+//***********************************************************************************
 /**
- * Implements hook_help().
+ * Implements Drupal hook_block_info().
+ */
+function vals_soc_block_info() {
+	module_load_include('inc', 'vals_soc', 'includes/module/vals_soc.block');
+	return vals_soc_block_info_handler();
+}
+
+
+/**
+ * Implements Drupal hook_block_view().
+ * @param string $delta
+ * @return multitype:string NULL
+ */
+function vals_soc_block_view($delta = '') {
+	module_load_include('inc', 'vals_soc', 'includes/module/vals_soc.block');
+	return vals_soc_block_view_handler($delta);
+}
+
+
+//***********************************************************************************
+// FORMS
+//***********************************************************************************
+/**
+ * Implements Drupal hook_form_FORM_ID_alter().
+ * @param unknown $form
+ * @param unknown $form_state
+ * @return Ambigous <multitype:string, multitype:string number NULL >
+ */
+function vals_soc_form_user_register_form_alter(&$form, &$form_state) {
+	module_load_include('inc', 'vals_soc', 'includes/module/vals_soc.forms');
+	return vals_soc_form_user_register_form_alter_handler($form, $form_state);
+}
+
+
+//***********************************************************************************
+// HELP
+//***********************************************************************************
+/**
+ * Implements Drupal hook_help().
  *
  * Displays help and module information.
  *
@@ -116,125 +58,52 @@ define('_ANONYMOUS_ROLE', 1);
  *   Array that holds the current path as returned from arg() function
  */
 function vals_soc_help($path, $arg) {
-  switch ($path) {
-    case "admin/help#soc":
-      return '<p>' . t("Laat ons semester of code blok zien") . '</p>';
-      break;
-  }
-} 
-
-/**
- * Implements hook_block_info().
- */
-function vals_soc_block_info() {
-  $blocks['soc'] = array(
-    // The name that will appear in the block list.
-    'info' => t('Semester of Code'),
-    // Default setting.
-    'cache' => DRUPAL_CACHE_PER_ROLE,
-  );
-  return $blocks;
+	switch ($path) {
+		case "admin/help#soc":
+			return '<p>' . t("Laat ons semester of code blok zien") . '</p>';
+			break;
+	}
 }
 
+
+//***********************************************************************************
+// MAIL
+//***********************************************************************************
 /**
- * Custom content function.
+ * Implements Drupal _hook_mail()
+ * 
+ * @param unknown $key
+ * @param unknown $message
+ * @param unknown $params
+ */
+function vals_soc_mail($key, &$message, $params) {
+	module_load_include('inc', 'vals_soc', 'includes/module/vals_soc.mail');
+	return vals_soc_mail_handler($key, $message, $params);
+}
+
+
+/**
+ * Implements Drupal _hook_mail_alter()
+ * 
+ * @param unknown $message
+ */
+function vals_soc_mail_alter(&$message) {
+	module_load_include('inc', 'vals_soc', 'includes/module/vals_soc.mail');
+	return vals_soc_mail_alter_handler($message);
+}
+
+
+//***********************************************************************************
+// MENUS
+//***********************************************************************************
+
+/**
+ * Implements Drupal _hook_menu()
  *
- * Set beginning and end dates, retrieve posts from database
- * saved in that time period.
- *
- * @return
- *   A result set of the targeted posts.
+ * include menu handler file and call the handler function
+ * @return multitype:string multitype:string  multitype:string multitype:string
  */
-function vals_soc_contents(){
-  //Get today's date.
-//  $today = getdate();
-//  //Calculate the date a week ago.
-//  $start_time = mktime(0, 0, 0,$today['mon'],($today['mday'] - 7), $today['year']);
-//  //Get all posts from one week ago to the present.
-//  $end_time = time();
-//  //Use Database API to retrieve current posts.
-//  $query = db_select('node', 'n')
-//    ->fields('n', array('nid', 'title', 'created'))
-//    ->condition('status', 1) //Published.
-//    ->condition('created', array($start_time, $end_time), 'BETWEEN')
-//    ->orderBy('created', 'DESC') //Most recent first.
-//    ->execute();
-  return array();
-}
-
-/**
- * Implements hook_form_FORM_ID_alter().
- */
-function vals_soc_form_user_register_form_alter(&$form, &$form_state) {
-//  if (variable_get('configurable_timezones', 1)) {
-//    if (variable_get('user_default_timezone', DRUPAL_USER_TIMEZONE_DEFAULT) == DRUPAL_USER_TIMEZONE_SELECT) {
-//      system_user_timezone($form, $form_state);
-//    }
-//    else {
-      $form['account']['account_type'] = array(
-        "#type" => "select",
-        "#title" => t("What is your role"),
-        //"#default_value" => 0,//variable_get('user_default_role', _ANONYMOUS_ROLE),
-        "#options" => array(
-            _STUDENT_ROLE => t("Student"),
-            _TUTOR_ROLE => t("Supervisor"),
-            _MENTOR_ROLE => t("Mentor"),
-        ),
-        "#description" => t("Select your role in Semester of Code."),
-    );
-
-    $form['account']['account_key'] = array(
-        "#type" => "textfield",
-        "#title" => t("Type the key you got from the admin"),
-        "#size" => 10,
-        "#description" => t("This code is different per role."),
-    );
-    
-    return $form;
- // }
-}
-
-  function vals_soc_projects(){
-      return array();
-      $result = db_select('soc_projects');
-  }
-  
-function vals_soc_block_view($delta = '') {
-  switch ($delta) {
-    case 'soc':
-      $block['subject'] = t('Het inner blok');
-      if (user_access('access content')) {
-        // Use our custom function to retrieve data.
-          
-        //Rol uitvinden van de user die is ingelogd
-          
-        $result = vals_soc_projects();
-        // Array to contain items for the block to render.
-        $items = array();
-        // Iterate over the resultset and format as links.
-        if ($result){
-            include('includes/classes/Projects.php');           
-            $project_obj = new Project();
-            foreach ($result as $project) {
-              $items[] = array(
-                'data' => $project_obj->show_project($project),
-              );
-            }
-        }
-        $block['content'] = '<h2>Current available projects</h2>';
-       // No content in the last week.
-        if (empty($items)) {
-          $block['content'] .= t('No projects available yet.');
-        }
-        else {
-          // Pass data through theme function.
-          $block['content'] = theme('item_list', array('items' => $items));
-        }
-        ob_start();
-        include(__DIR__.'/includes/index.php');
-        $soc_content = ob_get_clean();
-        $block['content'] = t('Here comes the content'). $soc_content;
-      }
-    return $block;
-  } 
+function vals_soc_menu(){
+	module_load_include('inc', 'vals_soc', 'includes/module/vals_soc.menus');
+	return vals_soc_menu_handler();
 }

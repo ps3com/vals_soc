@@ -1,159 +1,23 @@
 <?php
 
 /**
- * Implements hook_install().
+ * Implements Drupal hook_install().
  */
 function vals_soc_install(){
-    
+	module_load_include('inc', 'vals_soc', 'includes/install/vals_soc.roles');
 	create_roles();
     drupal_install_schema('soc_projects');
     drupal_install_schema('soc_codes');
     create_codes();
 }
 
-
 /**
- * Function to create the custom roles needed in drupal for the summer of code programme.
- */
-function create_roles(){
-	$roles = get_default_roles();
-	// Call the array with your default roles.
-	foreach ($roles as $value) {
-		// Check that a role is not already returned.
-		if (!user_role_load_by_name($value)) {
-			$role = new stdClass(); // create your Class
-			// Match values to the role Class.
-			$role->name = $value['name'];
-			$role->weight = $value['weight'];
-			// Save the Role using Drupal's API.
-			user_role_save($role);
-		}
-	}
-}
-
-function create_codes(){
-	$roles = get_default_roles();
-	// Call the array with your default roles.
-	foreach ($roles as $key=> $value) {
-		// Check that a role is not already returned.
-		if ($key !== 'Organization Administrator') {
-            db_insert('soc_codes')
-                ->fields(array(
-                    'type' => $value['name'],
-                    'code' => $value['code'],
-                  ))->execute();
-		}
-	}
-}
-
-/**
- * Function which defines a set of roles and returns them in an array.
- * @return multitype:multitype:string
- */
-function get_default_roles() {
-	$roles = array();
-	$roles['Organization Administrator'] = array(
-			'name' => 'Organization Administrator',
-			'weight' => '3',
-            'code' => 'AHGLL765OW'
-	);
-	$roles['Academic Supervisor'] = array(
-			'name' => 'Academic Supervisor',
-			'weight' => '4',
-            'code' => 'MNUFD783SF'
-	);
-	$roles['Mentor'] = array(
-			'name' => 'Mentor',
-			'weight' => '5',
-            'code' => 'QTU8TR44KJ'
-	);
-	$roles['Student'] = array(
-			'name' => 'Student',
-			'weight' => '6',
-            'code' => 'PGI99OPAQW'
-	);
-	return $roles;
-}
-	
-/* We create a schema which can be read by drupal's schema_install and used by drupal's create_tables
- * 
+ * Implements Drupal hook_schema()
+ * We create a schema which can be read by drupal's schema_install and used by drupal's create_tables
+ *
+ * @return multitype:string NULL
  */
 function vals_soc_schema() {
-  // NOTE: {variable} needs to be created before all other tables, as
-  // some database drivers, e.g. Oracle and DB2, will require variable_get()
-  // and variable_set() for overcoming some database specific limitations.
-
-      $schema['soc_projects'] = array(
-    'description' => 'The table of the projects',
-    'fields' => array(
-      'pid' => array(
-        'description' => 'Project id.',
-        'type' => 'varchar',
-        'length' => 256,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-     'title' => array(
-        'description' => 'The title of the project.',
-        'type' => 'varchar',
-        'length' => 256,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-     'description' => array(
-        'description' => 'The description of the project.',
-        'type' => 'varchar',
-        'length' => 1024,
-        'not null' => FALSE,
-        'default' => '',
-      ),
-      'selected' => array(
-        'description' => 'Whether the project is chosen by a student',
-        'type' => 'boolean',
-        'not null' => TRUE,
-        'default' => FALSE,
-      ),
-    ),
-    'primary key' => array('pid'),
-  );
-  $schema['soc_codes'] = array(
-    'description' => 'Create some random codes so that not just anybody can register.',
-    'fields' => array(
-      'type' => array(
-        'description' => 'The type of user.',
-        'type' => 'varchar',
-        'length' => 128,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-      'code' => array(
-        'description' => 'The code to enter at registration.',
-        'type' => 'varchar',
-        'length' => 10,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-    ),
-    'primary key' => array('type'),
-  );
-
-  return $schema;
+	module_load_include('inc', 'vals_soc', 'includes/install/vals_soc.schema');
+	return vals_soc_schema_handler();
 }
-
-/*
- * TODO - REFINE ROLES and ACCESS per role instance
- * 
- * THIS IS HOW TO SET PERMISSIONS ON A ROLE
- * 
-// Role to grant the permissions to
-$editor_role = user_role_load_by_name('editor');
-$editor_rid = $editor_role->rid;
-// Define our 'editor' role permissions
-$editor_permissions = array(
-  'administer blocks' => TRUE, // Grant permission
-  'access dashboard' => FALSE, // Revoke permission
-  ..., // more permissions' name
-);
-// Grant permissions to our 'editor' role
-user_role_change_permissions($editor_rid, $editor_permissions);
-*/
