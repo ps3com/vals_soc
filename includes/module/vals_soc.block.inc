@@ -52,6 +52,10 @@ function vals_soc_block_view_handler($delta = '') {
 				module_load_include('php', 'vals_soc', 'includes/module/index');
 				$soc_content = ob_get_clean();
 				$block['content'] = t('Here comes the content'). $soc_content;
+
+				ob_start();
+				module_load_include('inc', 'vals_soc', 'includes/module/ui/timeline');
+				$block['content'] .= ob_get_clean(); 
 			}
 			return $block;
 	}
