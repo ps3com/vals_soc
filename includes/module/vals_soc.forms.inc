@@ -142,6 +142,20 @@ function vals_soc_admin_timeline_form($form, &$form_state){
 			'#default_value' => variable_get('vals_timeline_program_end_date', ''),
 	);
 	
+	$form['vals_timeline_org_app_start_date'] = array(
+			'#type' => 'date_popup',
+			'#date_format' => 'Y-m-d H:i',
+			'#title' => t('Organisation signup start date'),
+			'#default_value' => variable_get('vals_timeline_org_app_start_date', ''),
+	);
+
+	$form['vals_timeline_org_app_end_date'] = array(
+			'#type' => 'date_popup',
+			'#date_format' => 'Y-m-d H:i',
+			'#title' => t('Organisation signup end date'),
+			'#default_value' => variable_get('vals_timeline_org_app_end_date', ''),
+	);
+	
 	$form['vals_timeline_accepted_org_announced_date'] = array(
 			'#type' => 'date_popup',
 			'#date_format' => 'Y-m-d H:i',
