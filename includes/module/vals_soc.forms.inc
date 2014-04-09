@@ -205,6 +205,41 @@ function vals_soc_admin_timeline_form($form, &$form_state){
 			'#default_value' => variable_get('vals_timeline_students_start_submit_forms_date', ''),
 	);
 	
+	$form['vals_timeline_community_bonding_start_date'] = array(
+			'#type' => 'date_popup',
+			'#date_format' => 'Y-m-d H:i',
+			'#title' => t('Community bonding period start date'),
+			'#default_value' => variable_get('vals_timeline_community_bonding_start_date', ''),
+	);
+
+	$form['vals_timeline_community_bonding_end_date'] = array(
+			'#type' => 'date_popup',
+			'#date_format' => 'Y-m-d H:i',
+			'#title' => t('Community bonding period end date'),
+			'#default_value' => variable_get('vals_timeline_community_bonding_end_date', ''),
+	);
+	
+	$form['vals_timeline_coding_start_date'] = array(
+			'#type' => 'date_popup',
+			'#date_format' => 'Y-m-d H:i',
+			'#title' => t('Coding start date'),
+			'#default_value' => variable_get('vals_timeline_coding_start_date', ''),
+	);
+
+	$form['vals_timeline_coding_end_date'] = array(
+			'#type' => 'date_popup',
+			'#date_format' => 'Y-m-d H:i',
+			'#title' => t('Coding end date'),
+			'#default_value' => variable_get('vals_timeline_coding_end_date', ''),
+	);
+	
+	$form['vals_timeline_suggested_coding_deadline'] = array(
+			'#type' => 'date_popup',
+			'#date_format' => 'Y-m-d H:i',
+			'#title' => t('Suggested coding deadline'),
+			'#default_value' => variable_get('vals_timeline_suggested_coding_deadline', ''),
+	);
+	
 	return system_settings_form($form);
 }
 
