@@ -15,9 +15,14 @@ class Timeline {
 	private $cached_students_matched_to_mentors_deadline_date;
 	private $cached_accepted_students_announced_deadline_date;
 	private $cached_students_start_submit_forms_date;
-
+	private $cached_community_bonding_start_date;
+	private $cached_community_bonding_end_date;
+	private $cached_coding_start_date;
+	private $cached_coding_end_date;
+	private $cached_suggested_coding_deadline;
+	
 	private function __construct(){
-		$this->fetchDatesFromDB();
+		$this->fetchDates();
 	}
 
 	public static function getInstance(){
@@ -27,7 +32,7 @@ class Timeline {
 		return self::$instance;
 	}
 
-	private function fetchDatesFromDB(){
+	private function fetchDates(){
 		$this->cached_program_active = variable_get('vals_timeline_program_active', 0);
 		$this->sanityCheck($this->cached_program_start_date, variable_get('vals_timeline_program_start_date'));
 		$this->sanityCheck($this->cached_program_end_date, variable_get('vals_timeline_program_end_date'));
@@ -40,23 +45,27 @@ class Timeline {
 		$this->sanityCheck($this->cached_students_matched_to_mentors_deadline_date, variable_get('vals_timeline_students_matched_to_mentors_deadline_date'));
 		$this->sanityCheck($this->cached_accepted_students_announced_deadline_date, variable_get('vals_timeline_accepted_students_announced_deadline_date'));
 		$this->sanityCheck($this->cached_students_start_submit_forms_date, variable_get('vals_timeline_students_start_submit_forms_date'));
-	}
+		$this->sanityCheck($this->cached_community_bonding_start_date, variable_get('vals_timeline_community_bonding_start_date'));
+		$this->sanityCheck($this->cached_community_bonding_end_date, variable_get('vals_timeline_community_bonding_end_date'));
+		$this->sanityCheck($this->cached_coding_start_date, variable_get('vals_timeline_coding_start_date'));
+		$this->sanityCheck($this->cached_coding_end_date, variable_get('vals_timeline_coding_end_date'));
+		$this->sanityCheck($this->cached_suggested_coding_deadline, variable_get('vals_timeline_suggested_coding_deadline'));
+	}	
 
-	private function sanityCheck(&$localCache, $value){
-		if(isset($value) && $this->validateDate($value)){
-			$localCache = new DateTime($value);
-		}
-		else{
-			// TODO - what do we do when these are not set.
-			//for now we'll just drop NOW in there.
-			$localCache = new DateTime();
-		}
+	/***********************************
+	 * 		Getter methods
+	* *********************************
+	*/
+	public function isProgramActive(){
+		return $this->cached_program_active;
 	}
 	
+	public function getProgramStartDate(){
+		return $this->cached_program_start_date;
+	}
 	
-	private function validateDate($date){
-		$d = DateTime::createFromFormat('Y-m-d H:i', $date);
-		return $d && $d->format('Y-m-d H:i') == $date;
+	public function getProgramEndDate(){
+		return $this->cached_program_end_date;
 	}
 	
 	public function getOrgsSignupStartDate(){
@@ -66,7 +75,11 @@ class Timeline {
 	public function getOrgsSignupEndDate(){
 		return $this->cached_org_signup_end_date;
 	}
-	
+
+	public function getOrgsAnnouncedDate(){
+		return $this->cached_accepted_org_announced_date;
+	}
+
 	public function getStudentsSignupStartDate(){
 		return $this->cached_student_signup_start_date;
 	}
@@ -74,15 +87,48 @@ class Timeline {
 	public function getStudentsSignupEndDate(){
 		return $this->cached_student_signup_end_date;
 	}
-	
-	public function isProgramActive(){
-		return $this->cached_program_active;
+		
+	public function getOrgsReviewApplicationsDate(){
+		return $this->cached_org_review_student_applications_date;
 	}
 	
-	public function getOrgsAnnouncedDate(){
-		return $this->cached_accepted_org_announced_date;
+	public function getStudentsMatchedToMentorsDate(){
+		return $this->cached_students_matched_to_mentors_deadline_date;
 	}
 	
+	public function getAcceptedStudentsAnnouncedDate(){
+		return $this->cached_accepted_students_announced_deadline_date;
+	}
+	
+	public function getStudentsSubmitFormsDate(){
+		return $this->cached_students_start_submit_forms_date;
+	}
+	
+	public function getCommunityBondingStartDate(){
+		return $this->cached_community_bonding_start_date;
+	}
+
+	public function getCommunityBondingEndDate(){
+		return $this->cached_community_bonding_end_date;
+	}
+
+	public function getCodingStartDate(){
+		return $this->cached_coding_start_date;
+	}
+
+	public function getCodingEndDate(){
+		return $this->cached_coding_end_date;
+	}
+	
+	public function getsuggestedCodingDeadline(){
+		return $this->cached_suggested_coding_deadline;
+	}
+	
+	
+	/***********************************
+	 * 		Helper methods
+	 * *********************************
+	 */
 	public function isOrganisationSignupPeriod(){
 		$now = new DateTime();
 		if($this->cached_org_signup_start_date < $now && $this->cached_org_signup_end_date > $now){
@@ -113,14 +159,25 @@ class Timeline {
 		return false;
 	}
 	
-	public function getProgramStartDate(){
-		return $this->cached_program_start_date;
+	private function sanityCheck(&$localCache, $value){
+		if(isset($value) && $this->validateDate($value)){
+			$localCache = new DateTime($value);
+		}
+		else{
+			// TODO - what do we do when these are not set.
+			//for now we'll just drop NOW in there.
+			$localCache = new DateTime();
+		}
+	}
+
+	private function validateDate($date){
+		$d = DateTime::createFromFormat('Y-m-d H:i', $date);
+		return $d && $d->format('Y-m-d H:i') == $date;
 	}
 	
-
 	public function resetCache(){
-		$this->fetchDatesFromDB();
+		$this->fetchDates();
 	}
 
-	function __destruct() {}
+	function __destruct(){}
 }
