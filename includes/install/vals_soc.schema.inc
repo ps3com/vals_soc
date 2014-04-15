@@ -36,6 +36,12 @@ function vals_soc_schema_handler() {
 							'not null' => TRUE,
 							'default' => 0,
 					),
+                'state' => array(
+							'description' => 'The state of the project',
+							'type' => 'varchar',
+							'length' => 128,
+							'not null' => FALSE,
+					),
 			),
 			'primary key' => array('pid'),
 	);
@@ -110,11 +116,6 @@ function vals_soc_schema_handler() {
 							'length' => 128,
 							'not null' => TRUE,
 							'default' => '',
-                        //TODO: deze moet er nog bij
-                        /*
-                         * ALTER TABLE `soc_organisations` ADD `url` VARCHAR( 256 ) NOT NULL 
-                         * ALTER TABLE `soc_organisations` ADD `description` VARCHAR( 1024 ) NOT NULL 
-                         */
 					),
 			),
 			'primary key' => array('inst_id'),
@@ -150,6 +151,20 @@ function vals_soc_schema_handler() {
 							'not null' => TRUE,
 							'default' => '',
 					),
+                    'url' => array(
+							'description' => 'The website of the organisation',
+							'type' => 'varchar',
+							'length' => 256,
+							'not null' => FALSE,
+							'default' => '',
+					),
+					'description' => array(
+							'description' => 'Description of the organisation',
+							'type' => 'varchar',
+							'length' => 1024,
+							'not null' => FALSE,
+							'default' => '',
+					)
 			),
 			'primary key' => array('org_id'),
 	);
@@ -168,6 +183,12 @@ function vals_soc_schema_handler() {
 							'length' => 'small',
 							'not null' => TRUE,
 					),
+                    'supervisor_id' => array(
+							'description' => 'The id of the teacher',
+							'type' => 'int',
+							'length' => 'medium',
+							'not null' => TRUE,
+					),
                     'name' => array(
 							'description' => 'The name of the group to remind.',
 							'type' => 'varchar',
@@ -181,18 +202,6 @@ function vals_soc_schema_handler() {
 							'not null' => FALSE,
 							'default' => '',
 					),
-                    'teacher' => array(
-							'description' => 'The id of the teacher',
-							'type' => 'int',
-							'length' => 'medium',
-							'not null' => TRUE,
-					),
-                    'code' => array(
-                        'description' => 'The code belonging to this group',
-							'type' => 'varchar',
-							'length' => 12,
-							'not null' => FALSE,
-                    )
 			),
 			'primary key' => array('group_id'),
 	);
