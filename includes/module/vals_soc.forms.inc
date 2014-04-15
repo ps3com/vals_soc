@@ -243,37 +243,236 @@ function vals_soc_admin_timeline_form($form, &$form_state){
 	return system_settings_form($form);
 }
 
+
+function vals_soc_form_user_profile_form_alter_handler(&$form, &$form_state) {
+    global $user;
+    $role = getRole();
+    
+    if (in_array($role, array('supervisor', 'institute_admin', 'student'))){
+        $member_inst_rec = db_select('soc_user_membership', 'mem')->fields('mem')->condition('uid', $user->uid)->
+            condition('type', 'institute')->execute()->fetchAssoc();
+        $member_inst = $member_inst_rec ? $member_inst_rec['oid'] : 0;
+        $institutes = db_select('soc_institutes', 'i')->fields('i', array('inst_id', 'name'))->execute()->fetchAll(PDO::FETCH_ASSOC);
+        $options_institutes = array(0 => t('Fill in later'));
+        foreach ($institutes as $ins){
+            $options_institutes[$ins['inst_id']] = $ins['name'];
+        }
+
+        $form['account']['institute'] = array(
+                "#type" => "select",
+                "#title" => t("Select the institute you are in $member_inst"),
+                "#options" => $options_institutes,
+                "#description" => t("(For students and tutors only)"),
+                "#default_value" => $member_inst,
+        );
+    } elseif (in_array($role, array('organisation_admin', 'mentor'))) {
+        $member_org_rec = db_select('soc_user_membership', 'mem')->fields('mem')->condition('uid', $user->uid)->
+            condition('type', 'organisation')->execute()->fetchAssoc();
+        $member_org = $member_org_rec ? $member_org_rec['oid'] : 0;
+        $organisations = db_select('soc_organisations', 'o')->fields('o', array('org_id', 'name'))->execute()->fetchAll(PDO::FETCH_ASSOC);
+        $options_organisation = array(0 => t('Fill in later'));
+        foreach ($organisations as $org){
+            $options_organisation[$org['org_id']] = $org['name'];
+        }
+
+        $form['account']['organisation'] = array(
+                "#type" => "select",
+                "#title" => t("Select the organisation you are in"),
+                "#options" => $options_organisation,
+                "#description" => t("(For organisation admins and mentors only)"),
+                "#default_value" => $member_org,
+        );
+    }
+    
+    $form['#submit'][] = 'vals_soc_form_user_profile_form_submit_handler';
+    //$form['#validate'][] = 'vals_soc_form_user_register_form_validate_handler';
+	return $form;
+}
+
 /**
- * Override the login form so we can add custom elements to it
- * @param unknown $form
- * @param unknown $form_state
+ * Override the register form so we can add custom elements to it
+ * @param array $form
+ * @param array $form_state
  * @return multitype:string number NULL
  */
 function vals_soc_form_user_register_form_alter_handler(&$form, &$form_state) {
-	//  if (variable_get('configurable_timezones', 1)) {
-	//    if (variable_get('user_default_timezone', DRUPAL_USER_TIMEZONE_DEFAULT) == DRUPAL_USER_TIMEZONE_SELECT) {
-	//      system_user_timezone($form, $form_state);
-	//    }
-	//    else {
-	$form['account']['account_type'] = array(
+    $institutes = db_select('soc_institutes', 'i')->fields('i', array('inst_id', 'name'))->execute()->fetchAll(PDO::FETCH_ASSOC);
+    $options_institutes = array(0 => t('Fill in later'));
+    foreach ($institutes as $ins){
+        $options_institutes[$ins['inst_id']] = $ins['name'];
+    }
+   
+    $form['account']['institute'] = array(
 			"#type" => "select",
-			"#title" => t("What is your role"),
-			//"#default_value" => 0,//variable_get('user_default_role', _ANONYMOUS_ROLE),
-			"#options" => array(
-					_STUDENT_ROLE => t("Student"),
-					_TUTOR_ROLE => t("Supervisor"),
-					_MENTOR_ROLE => t("Mentor"),
-			),
-			"#description" => t("Select your role in Semester of Code."),
+			"#title" => t("Select the institute you are in"),
+			"#options" => $options_institutes,
+			"#description" => t("(for students and tutors only)"),
 	);
+    
+    $organisations = db_select('soc_organisations', 'o')->fields('o', array('org_id', 'name'))->execute()->fetchAll(PDO::FETCH_ASSOC);
+    $options_organisation = array(0 => t('Fill in later'));
+    foreach ($organisations as $org){
+        $options_organisation[$org['org_id']] = $org['name'];
+    }
 
-	$form['account']['account_key'] = array(
-			"#type" => "textfield",
-			"#title" => t("Type the key you got from the admin"),
-			"#size" => 10,
-			"#description" => t("This code is different per role."),
+    $form['account']['organisation'] = array(
+			"#type" => "select",
+			"#title" => t("Select the organisation you are in"),
+			"#options" => $options_organisation,
+			"#description" => t("(for organisation admins and mentors only)"),
 	);
+    $current_role = getRole();
+    if ($current_role !== 'administrator'){
+        //If the admin adds users directly we do not want the following fields as these are already 
+        //provided in one or another way
+        
+        $form['account']['account_type'] = array(
+                "#type" => "select",
+                "#title" => t("What is your role"),
+                "#options" => array(
+                        'student' => t("Student"),
+                        'supervisor' => t("Supervisor"),
+                        'mentor' => t("Mentor"),
+                        'organisation_admin' => t('Organisation Admin'),
+                        'institute_admin' => t('Institute Admin'),
+                ),
+                "#description" => t("Select your role in Semester of Code."),
+        );
 
+        $form['account']['account_key'] = array(
+                "#type" => "textfield",
+                "#title" => t("Type the key you got from the admin"),
+                "#size" => 10,
+                "#description" => t("This code is different per role."),
+        );
+        
+        $default_language = language_default()->language;
+        $languages = db_select('languages', 'l')->fields('l', array('language', 'native'))->execute()->fetchAll(PDO::FETCH_ASSOC);
+        $options_lang = array();
+        foreach ($languages as $lang){
+            $options_lang[$lang['language']] = $lang['native'];
+        }
+
+        $form['account']['language'] = array(
+                "#type" => "select",
+                "#title" => t("Select the language you want for Semester of Code"),
+                "#options" => $options_lang,
+                "#description" => t("This will be the default language"),
+                "#default_value" => $default_language,
+        );
+    }
+    
+    $form['#submit'][] = 'vals_soc_form_user_register_form_submit_handler';
+    $form['#validate'][] = 'vals_soc_form_user_register_form_validate_handler';
 	return $form;
-	// }
+}
+
+function vals_soc_organisation_form($form, &$form_state){
+    
+    $form['name'] = array(
+            "#type" => "textfield",
+			'#title' => t('What is the name of your organisation?'),
+            "#size" => 60,
+            '#required' => '1',
+            //"#description" => t("This code is different per role."),
+	);
+	$form['description'] = array(
+            "#type" => "textarea",
+			'#title' => t('Describe your organisation, if you like'),
+            "#size" => 60,
+            //"#description" => t("This code is different per role."),
+	);
+    $form['url'] = array(
+            "#type" => "textfield",
+			'#title' => t('At what website can your organisation be found'),
+            "#size" => 150,
+            '#required' => '1',
+            //"#description" => t("This code is different per role."),
+	);
+    $form['contact_name'] = array(
+            "#type" => "textfield",
+			'#title' => t('Who is the contact person (you?)'),
+            "#size" => 100,
+            '#required' => '1',
+            //"#description" => t("This code is different per role."),
+	);
+    $form['contact_email'] = array(
+            "#type" => "textfield",
+			'#title' => t('What is the email of the contact person'),
+            "#size" => 100,
+            '#required' => '1',
+            //"#description" => t("This code is different per role."),
+	);
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => 'Submit',
+    );
+    $form['#submit'][] = 'vals_soc_organisation_form_submit_handler';
+    $form['#validate'][] = 'vals_soc_organisation_form_validate_handler';
+    return $form;
+}
+
+function vals_soc_institute_form($form, &$form_state){
+    
+    $form['name'] = array(
+            "#type" => "textfield",
+			'#title' => t('What is the name of your institute?'),
+            "#size" => 60,
+            //"#description" => t("This code is different per role."),
+	);
+	$form['description'] = array(
+            "#type" => "textarea",
+			'#title' => t('Describe your institute, if you like'),
+            "#size" => 60,
+            //"#description" => t("This code is different per role."),
+	);
+    $form['url'] = array(
+            "#type" => "textfield",
+			'#title' => t('At what website can your institute be found'),
+            "#size" => 150,
+            //"#description" => t("This code is different per role."),
+	);
+    $form['contact_name'] = array(
+            "#type" => "textfield",
+			'#title' => t('Who is the contact person (you?)'),
+            "#size" => 100,
+            //"#description" => t("This code is different per role."),
+	);
+    $form['contact_email'] = array(
+            "#type" => "textfield",
+			'#title' => t('What is the email of the contact person'),
+            "#size" => 100,
+            //"#description" => t("This code is different per role."),
+	);
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => 'Submit',
+    );
+    $form['#submit'][] = 'vals_soc_institute_form_submit_handler';
+    $form['#validate'][] = 'vals_soc_institute_form_validate_handler';
+    return $form;
+}
+
+function vals_soc_group_form($form, &$form_state){ 
+    $form['name'] = array(
+            "#type" => "textfield",
+			'#title' => t('Give a name to remember your student group'),
+            "#size" => 60,
+            '#required' => '1',
+            //"#description" => t("This code is different per role."),
+	);
+	$form['description'] = array(
+            "#type" => "textarea",
+			'#title' => t('Some additional note to describe the group'),
+            "#size" => 1024,
+            //"#description" => t("This code is different per role."),
+	);
+  
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => 'Submit',
+    );
+    $form['#submit'][] = 'vals_soc_group_form_submit_handler';
+    $form['#validate'][] = 'vals_soc_group_form_validate_handler';
+    return $form;
 }

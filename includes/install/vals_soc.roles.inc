@@ -1,11 +1,8 @@
-<?php 
-define('_SITE_ADMIN_ROLE', 7);
-define('_TUTOR_ROLE', 6);
-define('_MENTOR_ROLE', 5);
-define('_STUDENT_ROLE', 4);
-define('_ADMIN_ROLE', 3);
-define('_USER_ROLE', 2);
+<?php
+//The following are copied from the current database state. Can be neater to derive and put in the cache
+//or something like that
 define('_ANONYMOUS_ROLE', 1);
+define('_USER_ROLE', 2);
 
 /**
  * Function to create the custom roles needed in drupal for the summer of code programme.
@@ -33,48 +30,105 @@ function create_roles(){
 function create_codes(){
 	$roles = get_default_roles();
 	// Call the array with your default roles.
-	foreach ($roles as $key=> $value) {
-		// Check that a role is not already returned.
-		if ($key !== 'Organization Administrator') {
-			db_insert('soc_codes')
-			->fields(array(
-			'type' => $value['name'],
-			'code' => $value['code'],
-			))->execute();
-		}
-	}
+    if ($roles){
+        $query = db_insert('soc_codes')->fields(array('type' ,'code'));
+        foreach ($roles as $key => $value) {
+            $query->values(array(
+                'type' => $key,
+                'code' => $value['code'],
+                'org' => 0,
+                ));
+        }
+        //Now we have added all the code records
+        $query->execute();
+    }
 }
 
-
+/**
+ * Function which defines a set of roles and returns them in an array.
+ * @return multitype:multitype:string
+ */
 /**
  * Function which defines a set of roles and returns them in an array.
  * @return multitype:multitype:string
  */
 function get_default_roles() {
 	$roles = array();
-	$roles['Organization Administrator'] = array(
+    $roles['administrator'] = array(
+			'name' => 'Admin',
+			'weight' => '2',
+			'code' => 'BHTGSKKRWP'
+	);
+    $roles['soc'] = array(
+			'name' => 'Semester of Code',
+			'weight' => '2',
+			'code' => 'EICUN14SOC'
+	);
+	$roles['organisation_admin'] = array(
 			'name' => 'Organization Administrator',
 			'weight' => '3',
 			'code' => 'AHGLL765OW'
 	);
-	$roles['Academic Supervisor'] = array(
+	$roles['supervisor'] = array(
 			'name' => 'Academic Supervisor',
 			'weight' => '4',
 			'code' => 'MNUFD783SF'
 	);
-	$roles['Mentor'] = array(
+	$roles['mentor'] = array(
 			'name' => 'Mentor',
 			'weight' => '5',
 			'code' => 'QTU8TR44KJ'
 	);
-	$roles['Student'] = array(
+	$roles['student'] = array(
 			'name' => 'Student',
 			'weight' => '6',
 			'code' => 'PGI99OPAQW'
 	);
+    $roles['institute_admin'] = array(
+			'name' => 'Institute Responsible',
+			'weight' => '2',
+			'code' => 'A99ODF435W'
+	);
+    
 	return $roles;
 }
 
+function getRoles(){
+    global $user;
+
+    if (isset($user)){
+        return $user->roles;
+    } else {
+        return array();
+    }
+}
+
+function getRole(){
+    $roles = getRoles();
+    if ($roles) {
+        foreach ($roles as $rid => $name){
+            if ($rid == _ANONYMOUS_ROLE ){
+                return 'anonymous user';
+            } elseif ($rid !== _USER_ROLE) {
+                return $name;
+            }
+        }
+        return 'authenticated user';
+    }
+}
+
+function getUserRoleId($roles=''){
+    $roles = $roles ?: getRoles();
+    //Every user has exactly two roles: verified user (role 2) and some other role > 2
+    //Sort associative, reversed: [10 => 0, 9 => 9, 8 => 0,....]
+    arsort($roles);
+    foreach ($roles as $rid => $role_val){
+        if ($role_val != 0) {
+            return $rid;
+        }
+    }
+    return _USER_ROLE;
+}
 /*
  * TODO - REFINE ROLES and ACCESS per role instance
 *

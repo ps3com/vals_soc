@@ -42,6 +42,22 @@ function vals_soc_menu_handler(){
 			'file' => 'vals_soc.forms.inc',
 			'file path' => drupal_get_path('module', 'vals_soc') . '/includes/module/',
 	);
-	
+    $items['admin/config/vals_soc/administer'] = array(
+			'title' => t('Add an organisation, institute or group'),
+			'type' => MENU_NORMAL_ITEM,
+			'page callback' => 'vals_soc_administer_page',
+			'access arguments' => array('access administration pages'),
+			'description' => 'Allow Administration on institute etc.',
+			'file' => 'vals_soc.pages.inc',
+			'file path' => drupal_get_path('module', 'vals_soc') . '/includes/module/',
+	);
+//	$items['admin/config/vals_soc/administer/add/organisation'] = array(
+//            'title' => t('Add your organisation'),
+//            'page callback' => 'drupal_get_form',
+//            'page arguments' => array('vals_soc_organisation_form'),
+//            'access arguments' => array('access content'),
+//            'description' => t('Add your organisation'),
+//            'type' => MENU_CALLBACK,
+//    );
 	return $items;
 }

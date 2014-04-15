@@ -42,6 +42,13 @@ function vals_soc_schema_handler() {
 	$schema['soc_codes'] = array(
 			'description' => 'Create some random codes so that not just anybody can register.',
 			'fields' => array(
+                    'code_id' => array(
+							'description' => 'Code id.',
+							'type' => 'serial',
+							'length' => 'medium',
+							'not null' => TRUE,
+							//'default' => '',
+					),
 					'type' => array(
 							'description' => 'The type of user.',
 							'type' => 'varchar',
@@ -56,8 +63,169 @@ function vals_soc_schema_handler() {
 							'not null' => TRUE,
 							'default' => '',
 					),
+                    'org' => array(
+							'description' => 'The organisation/institute etc.',
+							'type' => 'int',
+							'length' => 'medium',
+							'not null' => TRUE,
+							'default' => 0,
+					),
+                    'group_id' => array(
+							'description' => 'To make it easier to retrieve the group of the code a student uses to register',
+							'type' => 'int',
+							'length' => 'medium',
+							'not null' => FALSE,
+					),
 			),
-			'primary key' => array('type'),
+			'primary key' => array('code_id'),
+	);
+    
+    $schema['soc_institutes'] = array(
+			'description' => 'The institutes gettting involved in the Semester of Code',
+			'fields' => array(
+					'inst_id' => array(
+							'description' => 'Institute id.',
+							'type' => 'serial',
+							'length' => 'small',
+							'not null' => TRUE,
+							//'default' => '',
+					),
+                    'name' => array(
+							'description' => 'The name of the institute.',
+							'type' => 'varchar',
+							'length' => 255,
+							'not null' => TRUE,
+							'default' => '',
+					),
+					'contact_name' => array(
+							'description' => 'The name of the contact person.',
+							'type' => 'varchar',
+							'length' => 128,
+							'not null' => TRUE,
+							'default' => '',
+					),
+                    'contact_email' => array(
+							'description' => 'The email of the contact person.',
+							'type' => 'varchar',
+							'length' => 128,
+							'not null' => TRUE,
+							'default' => '',
+                        //TODO: deze moet er nog bij
+                        /*
+                         * ALTER TABLE `soc_organisations` ADD `url` VARCHAR( 256 ) NOT NULL 
+                         * ALTER TABLE `soc_organisations` ADD `description` VARCHAR( 1024 ) NOT NULL 
+                         */
+					),
+			),
+			'primary key' => array('inst_id'),
+	);
+    $schema['soc_organisations'] = array(
+			'description' => 'The organisations gettting involved in the Semester of Code',
+			'fields' => array(
+					'org_id' => array(
+							'description' => 'Institute id.',
+							'type' => 'serial',
+							'length' => 'small',
+							'not null' => TRUE,
+							//'default' => '',
+					),
+                    'name' => array(
+							'description' => 'The name of the organisation.',
+							'type' => 'varchar',
+							'length' => 255,
+							'not null' => TRUE,
+							'default' => '',
+					),
+					'contact_name' => array(
+							'description' => 'The name of the contact person.',
+							'type' => 'varchar',
+							'length' => 128,
+							'not null' => TRUE,
+							'default' => '',
+					),
+                    'contact_email' => array(
+							'description' => 'The email of the contact person.',
+							'type' => 'varchar',
+							'length' => 128,
+							'not null' => TRUE,
+							'default' => '',
+					),
+			),
+			'primary key' => array('org_id'),
+	);
+    $schema['soc_groups'] = array(
+			'description' => 'The students will be divided in groups, each teacher probably having one or more groups',
+			'fields' => array(
+					'group_id' => array(
+							'description' => 'Group id.',
+							'type' => 'serial',
+							'length' => 'small',
+							'not null' => TRUE,
+					),
+                    'inst_id' => array(
+							'description' => 'Institute id.',
+							'type' => 'int',
+							'length' => 'small',
+							'not null' => TRUE,
+					),
+                    'name' => array(
+							'description' => 'The name of the group to remind.',
+							'type' => 'varchar',
+							'length' => 255,
+							'not null' => TRUE,
+					),
+					'description' => array(
+							'description' => 'Some description or comment',
+							'type' => 'varchar',
+							'length' => 512,
+							'not null' => FALSE,
+							'default' => '',
+					),
+                    'teacher' => array(
+							'description' => 'The id of the teacher',
+							'type' => 'int',
+							'length' => 'medium',
+							'not null' => TRUE,
+					),
+                    'code' => array(
+                        'description' => 'The code belonging to this group',
+							'type' => 'varchar',
+							'length' => 12,
+							'not null' => FALSE,
+                    )
+			),
+			'primary key' => array('group_id'),
+	);
+    $schema['soc_user_membership'] = array(
+			'description' => 'All users are member of some organisation, either a university or some software company etc.',
+			'fields' => array(
+					'mem_id' => array(
+							'description' => 'org relation id.',
+							'type' => 'serial',
+							'length' => 'small',
+							'not null' => TRUE,
+					),
+                    'uid' => array(
+							'description' => 'The id of the user.',
+							'type' => 'id',
+							'length' => 'medium',
+							'not null' => TRUE,
+							
+					),
+					'type' => array(
+							'description' => 'The type of the organisation.',
+							'type' => 'varchar',
+							'length' => 128,
+							'not null' => TRUE,
+					),
+                    'oid' => array(
+							'description' => 'The id of the organisation/institute/group etc.',
+							'type' => 'int',
+							'length' => 'medium',
+							'not null' => TRUE,
+					),
+			),
+			'primary key' => array('mem_id'),
 	);
 
 	return $schema;
