@@ -14,9 +14,9 @@ class Timeline {
 	private $cached_org_review_student_applications_date;
 	private $cached_students_matched_to_mentors_deadline_date;
 	private $cached_accepted_students_announced_deadline_date;
-	private $cached_students_start_submit_forms_date;
-	private $cached_community_bonding_start_date;
-	private $cached_community_bonding_end_date;
+	//private $cached_students_start_submit_forms_date;
+	//private $cached_community_bonding_start_date;
+	//private $cached_community_bonding_end_date;
 	private $cached_coding_start_date;
 	private $cached_coding_end_date;
 	private $cached_suggested_coding_deadline;
@@ -44,9 +44,9 @@ class Timeline {
 		$this->sanityCheck($this->cached_org_review_student_applications_date, variable_get('vals_timeline_org_review_student_applications_date'));
 		$this->sanityCheck($this->cached_students_matched_to_mentors_deadline_date, variable_get('vals_timeline_students_matched_to_mentors_deadline_date'));
 		$this->sanityCheck($this->cached_accepted_students_announced_deadline_date, variable_get('vals_timeline_accepted_students_announced_deadline_date'));
-		$this->sanityCheck($this->cached_students_start_submit_forms_date, variable_get('vals_timeline_students_start_submit_forms_date'));
-		$this->sanityCheck($this->cached_community_bonding_start_date, variable_get('vals_timeline_community_bonding_start_date'));
-		$this->sanityCheck($this->cached_community_bonding_end_date, variable_get('vals_timeline_community_bonding_end_date'));
+		//$this->sanityCheck($this->cached_students_start_submit_forms_date, variable_get('vals_timeline_students_start_submit_forms_date'));
+		//$this->sanityCheck($this->cached_community_bonding_start_date, variable_get('vals_timeline_community_bonding_start_date'));
+		//$this->sanityCheck($this->cached_community_bonding_end_date, variable_get('vals_timeline_community_bonding_end_date'));
 		$this->sanityCheck($this->cached_coding_start_date, variable_get('vals_timeline_coding_start_date'));
 		$this->sanityCheck($this->cached_coding_end_date, variable_get('vals_timeline_coding_end_date'));
 		$this->sanityCheck($this->cached_suggested_coding_deadline, variable_get('vals_timeline_suggested_coding_deadline'));
@@ -100,6 +100,7 @@ class Timeline {
 		return $this->cached_accepted_students_announced_deadline_date;
 	}
 	
+	/*
 	public function getStudentsSubmitFormsDate(){
 		return $this->cached_students_start_submit_forms_date;
 	}
@@ -111,7 +112,7 @@ class Timeline {
 	public function getCommunityBondingEndDate(){
 		return $this->cached_community_bonding_end_date;
 	}
-
+*/
 	public function getCodingStartDate(){
 		return $this->cached_coding_start_date;
 	}
@@ -120,7 +121,7 @@ class Timeline {
 		return $this->cached_coding_end_date;
 	}
 	
-	public function getsuggestedCodingDeadline(){
+	public function getSuggestedCodingDeadline(){
 		return $this->cached_suggested_coding_deadline;
 	}
 	
@@ -140,6 +141,40 @@ class Timeline {
 	public function isStudentsSignupPeriod(){
 		$now = new DateTime();
 		if($this->cached_student_signup_start_date < $now && $this->cached_student_signup_end_date > $now){
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * The pre-community bonding period is worked out by comparing the end of student signup
+	 * period and until the students announced date starts
+	 * @return boolean
+	 */
+	public function isPreCommunityBondingPeriod(){
+		$now = new DateTime();
+		if($this->cached_student_signup_end_date < $now && $this->cached_accepted_students_announced_deadline_date > $now){
+			return true;
+		}
+		return false;
+	}
+	
+	public function isCodingPeriod(){
+		$now = new DateTime();
+		if($this->cached_coding_start_date < $now && $this->cached_coding_end_date > $now){
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * The community bonding period is worked out by comparing the when the student list was announced
+	 * and until the the coding start date is due to start
+	 * @return boolean
+	 */
+	public function isCommunityBondingPeriod(){
+		$now = new DateTime();
+		if($this->cached_accepted_students_announced_deadline_date < $now && $this->cached_coding_start_date > $now){
 			return true;
 		}
 		return false;

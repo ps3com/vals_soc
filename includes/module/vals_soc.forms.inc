@@ -197,7 +197,7 @@ function vals_soc_admin_timeline_form($form, &$form_state){
 			'#title' => t('Accepted students announced deadline'),
 			'#default_value' => variable_get('vals_timeline_accepted_students_announced_deadline_date', ''),
 	);
-
+/*
 	$form['vals_timeline_students_start_submit_forms_date'] = array(
 			'#type' => 'date_popup',
 			'#date_format' => 'Y-m-d H:i',
@@ -218,7 +218,7 @@ function vals_soc_admin_timeline_form($form, &$form_state){
 			'#title' => t('Community bonding period end date'),
 			'#default_value' => variable_get('vals_timeline_community_bonding_end_date', ''),
 	);
-	
+*/	
 	$form['vals_timeline_coding_start_date'] = array(
 			'#type' => 'date_popup',
 			'#date_format' => 'Y-m-d H:i',
