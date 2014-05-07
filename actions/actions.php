@@ -67,9 +67,9 @@ switch ($_GET['action']){
         $organisation = Participants::filterPost($type, $_POST);
         $result = Participants::updateOrganisation($type, $organisation, $id);
         if ($result){
-            echo json_encode(['result'=>TRUE]);
+            echo json_encode(array('result'=>TRUE));
         } else {
-            echo json_encode(['result'=> 0, 'msg'=> t('Something went wrong')]);
+            echo json_encode(array('result'=> 0, 'msg'=> t('Something went wrong')));
         }
         /*
          * 
