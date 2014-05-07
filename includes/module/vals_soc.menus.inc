@@ -1,6 +1,16 @@
 <?php 
 
 function vals_soc_menu_handler(){
+	$items['projects/browse'] = array(
+			'title' => 'Projects',
+			'type' => MENU_NORMAL_ITEM,
+			'page callback' => 'vals_soc_browse_projects',
+			'access arguments' => array('authenticated user'), // This needs to be revisited
+			'description' => 'Projects page',
+			'file' => 'vals_soc.pages.inc',
+			'file path' => drupal_get_path('module', 'vals_soc') . '/includes/module/',
+	);	
+	
 	$items['admin/config/vals_soc'] = array(
 			'title' => 'VALS Summer of code',
 			'type' => MENU_NORMAL_ITEM,

@@ -19,10 +19,10 @@ function vals_soc_block_info_handler() {
 function vals_soc_block_view_handler($delta = '') {
     switch ($delta) {
 		case 'soc':
-			$block['subject'] = t('Het inner blok');
+			$block['subject'] = '';
 			if (user_access('access content')) {
 				// Use our custom function to retrieve data.
-
+/*
 				ob_start();
 				module_load_include('php', 'vals_soc', 'includes/module/index');
 				$soc_content = ob_get_clean();
@@ -30,7 +30,11 @@ function vals_soc_block_view_handler($delta = '') {
 
 				ob_start();
 				module_load_include('inc', 'vals_soc', 'includes/module/ui/timeline');
-				$block['content'] .= ob_get_clean(); 
+				$block['content'] .= ob_get_clean();
+*/ 
+				ob_start();
+				module_load_include('inc', 'vals_soc', 'includes/module/ui/blocklayout');
+				$block['content'] = ob_get_clean();
 			}
 			return $block;
             break;

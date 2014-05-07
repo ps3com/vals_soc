@@ -44,6 +44,14 @@ function vals_soc_schema_handler() {
 					),
 			),
 			'primary key' => array('pid'),
+        /*
+         * ALTER TABLE `soc_projects` ADD `organisation` MEDIUMINT NOT NULL AFTER `state` ,
+ADD `mentor` MEDIUMINT NOT NULL AFTER `organisation` ,
+ADD `student` MEDIUMINT NOT NULL AFTER `mentor` ,
+ADD `supervisor` MEDIUMINT NOT NULL AFTER `student`
+         * ALTER TABLE `soc_projects` ADD `url` VARCHAR( 1024 ) NOT NULL AFTER `description` 
+         * 
+         */
 	);
 	$schema['soc_codes'] = array(
 			'description' => 'Create some random codes so that not just anybody can register.',
@@ -216,7 +224,7 @@ function vals_soc_schema_handler() {
 					),
                     'uid' => array(
 							'description' => 'The id of the user.',
-							'type' => 'id',
+							'type' => 'int',
 							'length' => 'medium',
 							'not null' => TRUE,
 							

@@ -1,5 +1,5 @@
 name = VALS summer of code
-description = A framework which allows students to apply to complete software projects based on ideas given by organizations and mentors. Based on Googles Summer of Code (Melange)
+description = A framework which allows students to apply to complete software projects based on ideas given by organisations and mentors. Based on Googles Summer of Code (Melange)
 core = 7.x
 package = VALS Summer of code suite
 php = 5.2

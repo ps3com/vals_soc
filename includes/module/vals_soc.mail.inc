@@ -8,17 +8,17 @@
  */
 function vals_soc_mail_handler($key, &$message, $params) {
 	switch($key) {
-		case 'vals_soc_email_accepted_organization':
-			$message['subject'] = t('Organization application for VALS summer of code');
-			$message['body'][] = variable_get('vals_accepted_organizations_message')['value'];
+		case 'vals_soc_email_accepted_organisation':
+			$message['subject'] = t('Organisation application for VALS summer of code');
+			$message['body'][] = variable_get('vals_accepted_organisations_message')['value'];
 			if (isset($params['headers']) && is_array($params['headers'])) {
 				$message['headers'] += $params['headers'];
 			}
 			break;
 
-		case 'vals_soc_email_rejected_organization':
-			$message['subject'] = t('Organization application for VALS summer of code');
-			$message['body'][] = variable_get('vals_rejected_organizations_message')['value'];
+		case 'vals_soc_email_rejected_organisation':
+			$message['subject'] = t('Organisation application for VALS summer of code');
+			$message['body'][] = variable_get('vals_rejected_organisations_message')['value'];
 			break;
 
 		case 'vals_soc_email_mentor_welcome':
@@ -66,13 +66,13 @@ function vals_soc_mail_alter_handler(&$message) {
  */
 function vals_soc_handle_test_emails($to){
 	$mail_results='';
-	$message = drupal_mail('vals_soc', 'vals_soc_email_accepted_organization', $to, language_default());
+	$message = drupal_mail('vals_soc', 'vals_soc_email_accepted_organisation', $to, language_default());
 	if (!empty($message['result'])) {		
-		$mail_results .= 'accepted organization mail sent<br/>';
+		$mail_results .= 'accepted organisation mail sent<br/>';
 	}
-	$message = drupal_mail('vals_soc', 'vals_soc_email_rejected_organization', $to, language_default());
+	$message = drupal_mail('vals_soc', 'vals_soc_email_rejected_organisation', $to, language_default());
 	if (!empty($message['result'])) {
-		$mail_results .= 'rejected organization mail sent<br/>';
+		$mail_results .= 'rejected organisation mail sent<br/>';
 	}
 	$message = drupal_mail('vals_soc', 'vals_soc_email_mentor_welcome', $to, language_default());
 	if (!empty($message['result'])) {
@@ -89,6 +89,38 @@ function vals_soc_handle_test_emails($to){
 	$message = drupal_mail('vals_soc', 'vals_soc_rejected_students', $to, language_default());
 	if (!empty($message['result'])) {
 		$mail_results .= 'rejected students mail sent<br/>';
+	}
+	drupal_set_message($mail_results);
+}
+
+/*****************
+ *  TESTING
+ */
+
+// populate our queue with email recipients - Normally we'd get these from the DB
+function vals_soc_cron_email_test_setup(){
+	drupal_set_message('vals_soc_cron_email_test_setup called');
+	//$items = array("Hello", "World"); // Put everything in a queue for processing.
+	$items = array();
+	$items[0] = array('to' => 'ps3com40@gmail.com', 'bar' => 'foo',);
+	$items[1] = array('to' => 'ps3comps3com@googlemail.com', 'bar' => 'foo',);
+	
+	$queue = DrupalQueue::get('vals_soc_cron_email');
+	foreach($items as $item) {
+		$queue->createItem($item);
+	}
+}
+
+
+// this is the callback function for all entries posted on to the
+// 'vals_soc_cron_email' queue
+function vals_soc_cron_email_handler($item){
+	drupal_set_message('vals_soc_cron_email_handler called with:'.$item['to']);
+	//drupal_mail('vals_soc', 'vals_soc_email_accepted_organisation', $item['to'], language_default());
+	$mail_results='';
+	$message = drupal_mail('vals_soc', 'vals_soc_email_accepted_organisation', $item['to'], language_default());
+	if (!empty($message['result'])) {
+		$mail_results .= 'accepted organisation mail sent<br/>';
 	}
 	drupal_set_message($mail_results);
 }

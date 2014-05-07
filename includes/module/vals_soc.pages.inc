@@ -6,7 +6,7 @@ module_load_include('inc', 'vals_soc', 'includes/vals_soc.helper');
  * @return string
  */
 function vals_soc_timeline_admin_overview_page() {
-	return '<p>'.get_vals_version().'@<a href="./vals_soc/program_settings">'.t('Program settings').'</a></p>';
+	return '<p><a href="./vals_soc/program_settings">'.t('Program settings').'</a></p>';
 }
 
 /**
@@ -15,8 +15,8 @@ function vals_soc_timeline_admin_overview_page() {
  */
 function vals_soc_timeline_admin_program_page() {
     $version = get_vals_version();
-	$txt = '<p>'.$version.'@<a href="./program_settings/timeline">'.t('Edit Timeline').'</a></p>';
-	$txt .= '<p>'.$version.'@<a href="./program_settings/messages">'.t('Edit Messages').'</a></p>';
+	$txt = '<a href="./program_settings/timeline">'.t('Edit Timeline').'</a></p>';
+	$txt .= '<a href="./program_settings/messages">'.t('Edit Messages').'</a></p>';
 	return $txt;
 }
 
@@ -24,4 +24,10 @@ function vals_soc_administer_page(){
     ob_start();
     include('admin.php');
     return ob_get_clean();
+}
+
+function vals_soc_browse_projects(){
+	ob_start();
+	module_load_include('inc', 'vals_soc', 'includes/module/ui/projects');
+	return ob_get_clean();
 }

@@ -50,7 +50,7 @@ function vals_soc_uninstall() {
             db_drop_table($table);
         }
     }
-
+	//TODO - remove all custom roles in the drupal rols table
   menu_cache_clear_all();
 }
 /**
@@ -100,4 +100,13 @@ function vals_soc_update_7101() {
 			'primary key' => array('group_id'),
 	);
   db_create_table('soc_groups', $schema['soc_groups']);
+}
+
+function vals_soc_update_7102() {
+	$new_field = array(
+		'description' => 'The description of the project.',
+		'type' => 'text',
+		'not null' => FALSE,
+	);	
+	db_change_field('soc_projects', 'description', 'description', $new_field);
 }

@@ -8,22 +8,22 @@ module_load_include('inc', 'vals_soc', 'includes/install/vals_soc.roles');
  * @param unknown $form_state
  */
 function vals_soc_admin_messages_form($form, $form_state){
-	$accepted_orgs_prev_input = variable_get('vals_accepted_organizations_message',
+	$accepted_orgs_prev_input = variable_get('vals_accepted_organisations_message',
 			array('value'=>'Complete this section', 'format' => 'full_html'));
-	$form['vals_accepted_organizations_message'] = array(
+	$form['vals_accepted_organisations_message'] = array(
 		'#type' => 'text_format',
 		'#base_type' => 'textarea',
-		'#title' => t('Accepted organizations message'),		
+		'#title' => t('Accepted organisations message'),		
 		'#default_value' => $accepted_orgs_prev_input['value'],
 		'#suffix' => '<p></p>',
 	);
 	
-	$rejected_orgs_prev_input = variable_get('vals_rejected_organizations_message',
+	$rejected_orgs_prev_input = variable_get('vals_rejected_organisations_message',
 			array('value'=>'Complete this section', 'format' => 'full_html'));
-	$form['vals_rejected_organizations_message'] = array(
+	$form['vals_rejected_organisations_message'] = array(
 		'#type' => 'text_format',
 		'#base_type' => 'textarea',
-		'#title' => t('Rejected organizations message'),
+		'#title' => t('Rejected organisations message'),
 		'#default_value' => $rejected_orgs_prev_input['value'],
 		'#suffix' => '<p></p>',
 	);
@@ -78,6 +78,13 @@ function vals_soc_admin_messages_form($form, $form_state){
 		'#prefix' => '',
 		'#suffix' => '<div>' .t('Email address to which test messages must be sent. If provided, a test email is sent for each of the messages on this page to the given address').'.</div>',		
 	);
+	$form['vals_messages_test_cron_email'] = array(
+			'#type' => 'checkbox',
+			'#title' => 'cron email test',
+			'#tree' => TRUE,
+			'#default_value' => 0,
+	);
+	
 	
 	$form['#validate'][] = 'vals_soc_admin_messages_form_validate';
 	$form['#submit'][] = 'vals_soc_admin_messages_form_submit';
@@ -99,6 +106,7 @@ function vals_soc_admin_messages_form_validate($form, $form_state) {
 			form_set_error('vals_messages_test_email', t('Please Enter a valid email address or leave blank'));
 		}
 	}
+	
 }
 
 /**
@@ -113,6 +121,13 @@ function vals_soc_admin_messages_form_submit($form, $form_state) {
 		module_load_include('inc', 'vals_soc', 'includes/module/vals_soc.mail');
 		vals_soc_handle_test_emails($form_state['values']['vals_messages_test_email']);
 	}
+	// A test here to email via queues and cron
+	if ($form_state['values']['vals_messages_test_cron_email']==1){
+		drupal_set_message('cron email test started');
+		module_load_include('inc', 'vals_soc', 'includes/module/vals_soc.mail');
+		vals_soc_cron_email_test_setup();
+	}
+	
 }
 
 
@@ -159,7 +174,7 @@ function vals_soc_admin_timeline_form($form, &$form_state){
 	$form['vals_timeline_accepted_org_announced_date'] = array(
 			'#type' => 'date_popup',
 			'#date_format' => 'Y-m-d H:i',
-			'#title' => t('Accepted organizations announced deadline'),
+			'#title' => t('Accepted organisations announced deadline'),
 			'#default_value' => variable_get('vals_timeline_accepted_org_announced_date', ''),
 	);
 	
@@ -180,7 +195,7 @@ function vals_soc_admin_timeline_form($form, &$form_state){
 	$form['vals_timeline_org_review_student_applications_date'] = array(
 			'#type' => 'date_popup',
 			'#date_format' => 'Y-m-d H:i',
-			'#title' => t('Organizations review student applications deadline'),
+			'#title' => t('Organisations review student applications deadline'),
 			'#default_value' => variable_get('vals_timeline_org_review_student_applications_date', ''),
 	);
 	
@@ -333,7 +348,7 @@ function vals_soc_form_user_register_form_alter_handler(&$form, &$form_state) {
                         'student' => t("Student"),
                         'supervisor' => t("Supervisor"),
                         'mentor' => t("Mentor"),
-                        'organisation_admin' => t('Organisation Admin'),
+                        'organisation_admin' => t('Organisation Administrator'),
                         'institute_admin' => t('Institute Admin'),
                 ),
                 "#description" => t("Select your role in Semester of Code."),
@@ -412,44 +427,66 @@ function vals_soc_organisation_form($form, &$form_state){
     return $form;
 }
 
-function vals_soc_institute_form($form, &$form_state){
+function populate($obj, $prop, $default=''){
+    return ($obj && isset($obj->$prop)) ? $obj->$prop : $default;
+}
+
+function vals_soc_institute_form($form, &$form_state, $institute=''){
     
-    $form['name'] = array(
-            "#type" => "textfield",
-			'#title' => t('What is the name of your institute?'),
-            "#size" => 60,
-            //"#description" => t("This code is different per role."),
-	);
-	$form['description'] = array(
-            "#type" => "textarea",
-			'#title' => t('Describe your institute, if you like'),
-            "#size" => 60,
-            //"#description" => t("This code is different per role."),
-	);
-    $form['url'] = array(
-            "#type" => "textfield",
-			'#title' => t('At what website can your institute be found'),
-            "#size" => 150,
-            //"#description" => t("This code is different per role."),
-	);
-    $form['contact_name'] = array(
-            "#type" => "textfield",
-			'#title' => t('Who is the contact person (you?)'),
-            "#size" => 100,
-            //"#description" => t("This code is different per role."),
-	);
-    $form['contact_email'] = array(
-            "#type" => "textfield",
-			'#title' => t('What is the email of the contact person'),
-            "#size" => 100,
-            //"#description" => t("This code is different per role."),
-	);
-    $form['submit'] = array(
-        '#type' => 'submit',
-        '#value' => 'Submit',
-    );
-    $form['#submit'][] = 'vals_soc_institute_form_submit_handler';
-    $form['#validate'][] = 'vals_soc_institute_form_validate_handler';
+     $form['name'] = array(
+             "#type" => "textfield",
+ 			'#title' => t('What is the name of your institute?'),
+             "#size" => 60,
+             "#default_value" => populate($institute, 'name')
+             //"#description" => t("This code is different per role."),
+ 	);
+ 	$form['description'] = array(
+             "#type" => "textarea",
+ 			'#title' => t('Describe your institute, if you like'),
+             "#size" => 60,
+             "#default_value" => populate($institute, 'description')
+             //"#description" => t("This code is different per role."),
+ 	);
+     $form['url'] = array(
+             "#type" => "textfield",
+ 			'#title' => t('At what website can your institute be found').$form['id'],
+             "#size" => 120,
+             "#default_value" => populate($institute, 'url')
+             //"#description" => t("This code is different per role."),
+ 	);
+     $form['contact_name'] = array(
+             "#type" => "textfield",
+ 			'#title' => t('Who is the contact person (you?)'),
+             "#size" => 100,
+             "#default_value" => populate($institute, 'contact_name')
+             //"#description" => t("This code is different per role."),
+ 	);
+     $form['contact_email'] = array(
+             "#type" => "textfield",
+ 			'#title' => t('What is the email of the contact person'),
+             "#size" => 100,
+             "#default_value" => populate($institute, 'contact_email')
+             //"#description" => t("This code is different per role."),
+ 	);
+     if (!$institute){
+         $form['submit'] = array(
+             '#type' => 'submit',
+             '#value' => 'Submit',
+         );
+         $form['#submit'][] = 'vals_soc_institute_form_submit_handler';
+         $form['#validate'][] = 'vals_soc_institute_form_validate_handler';
+     } else {
+         unset($form['#submit']);
+         $form['sumbit'] = array(
+           '#type' => 'button',
+           '#button_type' => 'button',
+           '#value' => 'Zenden',
+           //'#theme' => 'garland_button',
+           '#attributes' => array(
+               'onclick' => 'ajaxFormCall("vals-soc-institute-form", "vals_soc", "save", {type: "institute", id: '.
+                  $institute->inst_id.' }, "inst_page-2", "json");')
+         );
+     }
     return $form;
 }
 

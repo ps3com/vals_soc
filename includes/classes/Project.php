@@ -6,12 +6,18 @@
  * and open the template in the editor.
  */
 class Project {
-    private $title = 'Dummy project title';
+	
+	private static $instance;
+	
+	public static function getInstance(){
+		if (is_null ( self::$instance )){
+			self::$instance = new self ();
+		}
+		return self::$instance;
+	}
     
-    public function showProject($project='', $echo=TRUE){
-        $s = '';
-        if (!$project) {
-            $s = $this->title;
-        }
+    public function getProjects(){
+    	$projects = db_select('soc_projects')->fields('soc_projects')->execute()->fetchAll(PDO::FETCH_ASSOC);
+    	return $projects;
     }
 }

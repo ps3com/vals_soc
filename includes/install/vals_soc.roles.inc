@@ -59,13 +59,14 @@ function get_default_roles() {
 			'weight' => '2',
 			'code' => 'BHTGSKKRWP'
 	);
+    // why do we need the role soc?
     $roles['soc'] = array(
 			'name' => 'Semester of Code',
 			'weight' => '2',
 			'code' => 'EICUN14SOC'
 	);
 	$roles['organisation_admin'] = array(
-			'name' => 'Organization Administrator',
+			'name' => 'Organisation Administrator',
 			'weight' => '3',
 			'code' => 'AHGLL765OW'
 	);

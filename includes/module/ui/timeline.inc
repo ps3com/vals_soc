@@ -45,6 +45,7 @@ function getScript($timeline_args){
 				var d_day = new Date();
 				// note month in js is oddly 0-11 based rather than 1-12
 				d_day = new Date('.$timeline_args['countdown']->format('Y,m-1,d,H,i,s').');
+			    // TODO - the following does not work on older versions of webkit - results in NAN error
 				$("#vals-timeline-countdown").countdown({until: d_day});
 			';
 		}
@@ -77,7 +78,7 @@ function getLayout($timeline_args, $show_countdown = true){
 		$countRemaining = t('Remaining');
 	}
 	return $outputBuf . '
-		<div id="program-map" class="block block-project-timeline">
+		<div id="program-map" class="block block-project-timeline block-padding">
 			<h4 id="title-section-program-timeline">'.t('Program Timeline').'</h4>
 			<div id="block-program-timeline-content" class="block-content">
 				<div class="block-program-timeline-new">
